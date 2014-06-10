@@ -26,7 +26,7 @@ module Libv8
       flags << "strictaliasing=off" if @compiler.is_a?(Compiler::GCC) and @compiler.version < '4.4'
 
       # Avoid compilation failures on the Raspberry Pi.
-      flags << "vfp2=off vfp3=on" if @compiler.target.include? "arm"
+      flags << "vfp2=off vfp3=off" if @compiler.target.include? "arm"
 
       # FIXME: Determine when to activate this instead of leaving it on by
       # default.
@@ -38,10 +38,6 @@ module Libv8
 
       # Solaris / Smart OS requires additional -G flag to use with -fPIC
       flags << "CFLAGS=-G" if @compiler.target =~ /solaris/
-
-      # Disable werror as this version of v8 is getting difficult to maintain
-      # with it on
-      flags << 'werror=no'
 
       "#{make_target} #{flags.join ' '}"
     end
@@ -59,9 +55,11 @@ module Libv8
           # use a script that will fix the paths in the generated Makefiles
           # don't use make_flags otherwise it will trigger a rebuild of the Makefiles
           system "env CXX=#{@compiler} LINK=#{@compiler} bash #{PATCH_DIRECTORY}/mingw-generate-makefiles.sh"
+          puts 'Beginning compilation. This will take some time.'
           system "env CXX=#{@compiler} LINK=#{@compiler} make #{make_target}"
           
         else
+          puts 'Beginning compilation. This will take some time.'
           puts `env CXX=#{@compiler} LINK=#{@compiler} #{make} #{make_flags}`
         end
       end
