@@ -1,9 +1,12 @@
 rvm:
   - 2.0.0
-  - 2.1.5
+  - 2.1.2
   - 1.9.3
-  - rbx
-bundler_args: --jobs=1 --retry=3
+  - rbx-2
+  - ree
+matrix:
+  allow_failures:
+    - rvm: ree
 notifications:
   recipients:
     - cowboyd@thefrontside.net
