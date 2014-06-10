@@ -50,7 +50,7 @@ module Libv8
       Dir.chdir('vendor/v8') do
         fail 'No compilers available' if @compiler.nil?
         setup_python!
-        patch!(*patch_directories_for(@compiler))
+        patch!
         setup_build_deps!
         print_build_info
 
