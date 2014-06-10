@@ -2,14 +2,12 @@ require 'mkmf'
 require File.expand_path '../compiler', __FILE__
 require File.expand_path '../arch', __FILE__
 require File.expand_path '../make', __FILE__
-require File.expand_path '../checkout', __FILE__
 require File.expand_path '../patcher', __FILE__
 
 module Libv8
   class Builder
     include Libv8::Arch
     include Libv8::Make
-    include Libv8::Checkout
     include Libv8::Patcher
 
     def initialize
@@ -49,12 +47,11 @@ module Libv8
     end
 
     def build_libv8!
-      Dir.chdir(V8_Source) do
+      Dir.chdir('vendor/v8') do
         fail 'No compilers available' if @compiler.nil?
-        checkout!
         setup_python!
+        patch!(*patch_directories_for(@compiler))
         setup_build_deps!
-        patch! *patch_directories_for(@compiler)
         print_build_info
 
         case RUBY_PLATFORM
@@ -86,10 +83,7 @@ module Libv8
     end
 
     def setup_build_deps!
-      # This uses the Git mirror of the svn repository used by
-      # "make dependencies", instead of calling that make target
-      `rm -rf build/gyp`
-      `ln -fs #{GYP_Source} build/gyp`
+      `make dependencies`
     end
 
     private
