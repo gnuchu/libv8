@@ -14,7 +14,6 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "libv8"
 
-
   s.files  = `git ls-files`.split("\n")
   s.files += Dir.chdir("vendor/v8") do
     `git ls-files`.split("\n").reject {|f| f =~ /^out|^test|^benchmarks/}.map {|f| "vendor/v8/#{f}"}
@@ -27,8 +26,9 @@ Gem::Specification.new do |s|
   s.extensions = ["ext/libv8/extconf.rb"]
   s.require_paths = ["lib", "ext"]
 
-  s.add_development_dependency 'rake', '~> 10'
-  s.add_development_dependency 'rake-compiler', '~> 0'
-  s.add_development_dependency 'rspec', '~> 2'
-  s.add_development_dependency 'rspec-spies', '~> 2'
+  s.add_development_dependency "rake"
+  s.add_development_dependency "rake-compiler"
+  s.add_development_dependency "rspec"
+  s.add_development_dependency "rspec-spies"
+  s.add_development_dependency "rubysl", "~> 2.0" if RUBY_ENGINE == "rbx"
 end

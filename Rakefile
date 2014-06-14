@@ -1,23 +1,20 @@
 require 'bundler/setup'
-Bundler::GemHelper.install_tasks
-class Bundler::GemHelper
-  def clean?
-    sh_with_code('git diff --exit-code --ignore-submodules')[1] == 0
-  end
-end
-
 require 'rspec/core/rake_task'
+
+Bundler::GemHelper.install_tasks
 RSpec::Core::RakeTask.new(:spec)
 
-require File.expand_path '../ext/libv8/make.rb', __FILE__
-require File.expand_path '../ext/libv8/checkout.rb', __FILE__
-include Libv8::Make
-include Libv8::Checkout
+module Helpers
+  module_function
+  def get_binary_gemspec(platform = RUBY_PLATFORM)
+    gemspec = eval(File.read('libv8.gemspec'))
+    gemspec.platform = Gem::Platform.new(platform)
+    gemspec
+  end
 
-desc "setup the vendored v8 source to correspond to the libv8 gem version"
-task :checkout do
-  sh "git submodule update --init"
-  checkout!
+  def binary_gem_name
+    File.basename get_binary_gemspec.cache_file
+  end
 end
 
 desc "compile v8 via the ruby extension mechanism"
@@ -25,30 +22,9 @@ task :compile => :devkit do
   sh "ruby ext/libv8/extconf.rb"
 end
 
-desc "manually invoke the GYP compile. Useful for seeing debug output"
-task :manual_compile do
-  require File.expand_path '../ext/libv8/arch.rb', __FILE__
-  include Libv8::Arch
-  Dir.chdir(V8_Source) do
-    sh %Q{#{make} -j2 #{libv8_arch}.release ARFLAGS.target=crs}
-  end
-end
-
-def get_binary_gemspec(platform = RUBY_PLATFORM)
-  gemspec = eval(File.read('libv8.gemspec'))
-  gemspec.platform = Gem::Platform.new(platform)
-  gemspec
-end
-
-begin
-  binary_gem_name = File.basename get_binary_gemspec.cache_file
-rescue
-  binary_gem_name = ''
-end
-
-desc "build a binary gem #{binary_gem_name}"
+desc "build a binary gem #{Helpers.binary_gem_name}"
 task :binary => :compile do
-  gemspec = get_binary_gemspec
+  gemspec = Helpers.get_binary_gemspec
   gemspec.extensions.clear
   # We don't need most things for the binary
   gemspec.files = []
@@ -87,5 +63,5 @@ task :devkit do
   end
 end
 
-task :default => [:checkout, :compile, :spec]
-task :build => [:clean, :checkout]
+task :default => [:compile, :spec]
+task :build => [:clean]
