@@ -60,7 +60,7 @@ module Libv8
           
         else
           puts 'Beginning compilation. This will take some time.'
-          puts `env CXX=#{@compiler} LINK=#{@compiler} #{make} #{make_flags}`
+          system "env CXX=#{@compiler} LINK=#{@compiler} #{make} #{make_flags}"
         end
       end
       return $?.exitstatus
