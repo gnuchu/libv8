@@ -55,13 +55,12 @@ module Libv8
           # use a script that will fix the paths in the generated Makefiles
           # don't use make_flags otherwise it will trigger a rebuild of the Makefiles
           system "env CXX=#{@compiler} LINK=#{@compiler} bash #{PATCH_DIRECTORY}/mingw-generate-makefiles.sh"
-          puts 'Beginning compilation. This will take some time.'
-          system "env CXX=#{@compiler} LINK=#{@compiler} make #{make_target}"
-          
-        else
-          puts 'Beginning compilation. This will take some time.'
-          system "env CXX=#{@compiler} LINK=#{@compiler} #{make} #{make_flags}"
         end
+
+        puts 'Beginning compilation. This will take some time.'
+        command = "env CXX=#{@compiler} LINK=#{@compiler} #{make} #{make_flags}"
+        puts "Building v8 with #{command}"
+        system command
       end
       return $?.exitstatus
     end
