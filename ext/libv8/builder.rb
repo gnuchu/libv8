@@ -53,7 +53,9 @@ module Libv8
         setup_build_deps!
         patch! *patch_directories_for(@compiler)
         print_build_info
-        puts `env CXX=#{@compiler} LINK=#{@compiler} #{make} #{make_flags}`
+        command = "env CXX=#{@compiler} LINK=#{@compiler} #{make} #{make_flags}"
+        puts "Compiling v8 with: #{command}"
+        system command
       end
       return $?.exitstatus
     end

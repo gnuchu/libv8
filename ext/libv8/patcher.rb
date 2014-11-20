@@ -46,7 +46,8 @@ module Libv8
         applied_patches = f.readlines.map(&:chomp)
 
         (available_patches - applied_patches).each do |patch|
-          `patch -p1 -N < #{patch}`
+          puts "Applying #{patch}:"
+          system "patch -p1 -N < #{patch}"
           f.puts patch
         end
       end
