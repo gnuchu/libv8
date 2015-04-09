@@ -13,7 +13,9 @@ describe "libv8 locations" do
 
     describe "configuring a compliation context with it" do
       before do
-        allow(@context).to receive(:find_header) {true}
+        allow(@context).to receive(:find_header).and_return(true)
+        allow(@context).to receive(:have_library).and_return(true)
+
         @location.configure @context
       end
 
@@ -21,16 +23,30 @@ describe "libv8 locations" do
         expect(@context).to have_received(:dir_config).with('v8').at_least(:once)
         expect(@context).to have_received(:find_header).with('v8.h').at_least(:once)
       end
+
+      it "adds the library path to the front of the library flags" do
+        expect(@context).to have_received(:have_library).with('v8').at_least(:once)
+      end
+    end
+
+    describe "when the v8 library cannot be found" do
+      before do
+        allow(@context).to receive(:find_header).and_return(true)
+        allow(@context).to receive(:have_library).and_return(false)
+      end
+
+      it "raises a NotFoundError" do
+        expect { @location.configure @context }.to raise_error Libv8::Location::System::NotFoundError
+      end
     end
 
     describe "when the v8.h header cannot be found" do
-
       before do
         allow(@context).to receive(:find_header) {false}
       end
 
       it "raises a NotFoundError" do
-        expect {@location.configure @context}.to raise_error Libv8::Location::System::NotFoundError
+        expect { @location.configure @context }.to raise_error Libv8::Location::System::NotFoundError
       end
     end
   end
